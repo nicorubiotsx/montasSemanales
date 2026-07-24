@@ -39,10 +39,18 @@ function useDebouncedEffect(callback: () => void, delay: number, deps: any[]) {
 }
 
 export const MontasProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Calcular la semana actual al iniciar
+  const getSemanaHoy = () => {
+    const hoy = new Date();
+    const fechaHoy = `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-${String(hoy.getDate()).padStart(2, '0')}`;
+    return calcularSemanaDesdeFecha(fechaHoy);
+  };
+
   const [estado, setEstado] = useState<EstadoGlobalFarm>(() => {
+    const { numeroSemana } = getSemanaHoy();
     return {
-      semanaActual: 1,
-      semanas: { 1: crearSemanaInicial(1) },
+      semanaActual: numeroSemana,
+      semanas: { [numeroSemana]: crearSemanaInicial(numeroSemana) },
       programadas: [],
       batches: []
     };
@@ -51,11 +59,20 @@ export const MontasProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const isLoadedRef = useRef(false);
   const saveCounterRef = useRef(0);
 
-  // 1. Carga inicial desde el servidor (solo 1 vez)
+  // 1. Carga inicial desde el servidor (solo 1 vez), siempre aterriza en la semana actual
   useEffect(() => {
     sincronizarEstadoConServer(estado).then(remoteState => {
       if (remoteState && remoteState.semanas && Object.keys(remoteState.semanas).length > 0) {
-        setEstado(remoteState);
+        const { numeroSemana } = getSemanaHoy();
+        const nuevasSemanas = { ...remoteState.semanas };
+        if (!nuevasSemanas[numeroSemana]) {
+          nuevasSemanas[numeroSemana] = crearSemanaInicial(numeroSemana);
+        }
+        setEstado({
+          ...remoteState,
+          semanaActual: numeroSemana,
+          semanas: nuevasSemanas
+        });
       }
       isLoadedRef.current = true;
     }).catch(() => {
