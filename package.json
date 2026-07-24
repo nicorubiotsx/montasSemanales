@@ -1,0 +1,36 @@
+{
+  "name": "gestion-montas-porcinas-nextjs",
+  "private": true,
+  "version": "2.0.0",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:generate": "drizzle-kit generate:pg",
+    "db:push": "drizzle-kit push:pg",
+    "db:seed": "tsx src/db/seed.ts",
+    "db:clear": "tsx src/db/clear.ts"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0",
+    "drizzle-orm": "^0.30.7",
+    "lucide-react": "^0.344.0",
+    "next": "^14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "@types/react": "^18.2.64",
+    "@types/react-dom": "^18.2.21",
+    "autoprefixer": "^10.4.18",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "^0.20.14",
+    "postcss": "^8.4.35",
+    "tailwindcss": "^3.4.1",
+    "tsx": "^4.7.1",
+    "typescript": "^5.2.2"
+  }
+}
