@@ -172,24 +172,30 @@ export function calcularSemanaDesdeFecha(fechaStr: string): {
   const [y, m, d] = fechaStr.split('-').map(Number);
   const targetDate = new Date(y, (m || 1) - 1, d || 1);
 
+  // Encontrar el lunes de la semana que contiene targetDate
   const dayOfWeek = targetDate.getDay();
   const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
   const monday = new Date(targetDate);
   monday.setDate(targetDate.getDate() + diffToMonday);
 
-  const targetYear = monday.getFullYear();
-  const jan1 = new Date(targetYear, 0, 1);
-  const firstJanDayOfWeek = jan1.getDay();
-  const jan1MondayDiff = firstJanDayOfWeek === 0 ? 1 : (firstJanDayOfWeek === 1 ? 0 : 8 - firstJanDayOfWeek);
-  const firstMondayOfYear = new Date(targetYear, 0, 1 + jan1MondayDiff);
+  // --- Cálculo ISO 8601 del número de semana ---
+  // El jueves de la misma semana determina a qué año ISO pertenece la semana.
+  const thursday = new Date(monday);
+  thursday.setDate(monday.getDate() + 3);
 
-  let numeroSemana = Math.floor((monday.getTime() - firstMondayOfYear.getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+  // El año ISO es el año del jueves
+  const isoYear = thursday.getFullYear();
 
-  if (numeroSemana < 1) {
-    numeroSemana = 1;
-  } else if (numeroSemana > 52) {
-    numeroSemana = 52;
-  }
+  // Encontrar el 4 de enero del año ISO (siempre pertenece a la semana 1 ISO)
+  const jan4 = new Date(isoYear, 0, 4);
+  const jan4DayOfWeek = jan4.getDay();
+  const jan4DiffToMonday = jan4DayOfWeek === 0 ? -6 : 1 - jan4DayOfWeek;
+  const firstISOMonday = new Date(jan4);
+  firstISOMonday.setDate(jan4.getDate() + jan4DiffToMonday);
+
+  // Número de semana = diferencia en semanas entre el lunes actual y el lunes de la semana 1 ISO
+  const diffMs = monday.getTime() - firstISOMonday.getTime();
+  const numeroSemana = Math.round(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
 
   const mondayY = monday.getFullYear();
   const mondayM = String(monday.getMonth() + 1).padStart(2, '0');
@@ -201,6 +207,6 @@ export function calcularSemanaDesdeFecha(fechaStr: string): {
     numeroSemana,
     fechaInicioLunes,
     mes: mesCalculado,
-    anio: mondayY
+    anio: isoYear
   };
 }
